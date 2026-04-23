@@ -1,3 +1,5 @@
+https://editor.swagger.io/
+
 # Toopakkumiste ja kandidaatide haldus (ATS) - Backend
 
 Simple REST backend for candidate tracking with CV data, interview scheduling, and current status history.
@@ -74,7 +76,7 @@ Schedule interview:
 
 ```json
 {
-  "interviewer": "Karl Recruiter",
+  "interviewer": "Mark Recruiter",
   "type": "video",
   "scheduledAt": "2026-04-24T10:00:00.000Z",
   "durationMinutes": 60,
