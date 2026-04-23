@@ -1,0 +1,767 @@
+﻿{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Toopakkumiste ja kandidaatide haldus (ATS) API",
+    "version": "1.0.0",
+    "description": "Backend API for managing candidates, CV data, interviews, and candidate status lifecycle.\n"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Candidates"
+    },
+    {
+      "name": "Interviews"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Service health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/candidates": {
+      "get": {
+        "tags": [
+          "Candidates"
+        ],
+        "summary": "List all candidates",
+        "responses": {
+          "200": {
+            "description": "List of candidates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Candidate"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Candidates"
+        ],
+        "summary": "Create a candidate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCandidateRequest"
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "firstName": "Mari",
+                    "lastName": "Tamm",
+                    "email": "mari.tamm@example.com",
+                    "phone": "+37255550000",
+                    "position": "Backend Developer",
+                    "cvUrl": "https://example.com/cv/mari-tamm.pdf",
+                    "cvText": "5+ years of Node.js and SQL experience",
+                    "notes": "Referred by employee"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Candidate created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Candidate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/candidates/{candidateId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/CandidateId"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Candidates"
+        ],
+        "summary": "Get candidate by id",
+        "responses": {
+          "200": {
+            "description": "Candidate details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Candidate"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Candidates"
+        ],
+        "summary": "Update candidate fields",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCandidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Candidate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Candidates"
+        ],
+        "summary": "Delete candidate and related interviews",
+        "responses": {
+          "204": {
+            "description": "Candidate deleted"
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/candidates/{candidateId}/status": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/CandidateId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Candidates"
+        ],
+        "summary": "Update candidate current status",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusUpdateRequest"
+              },
+              "examples": {
+                "screening": {
+                  "value": {
+                    "status": "screening",
+                    "note": "Phone screen completed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Candidate status updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Candidate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/candidates/{candidateId}/interviews": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/CandidateId"
+        }
+      ],
+      "post": {
+        "tags": [
+          "Interviews"
+        ],
+        "summary": "Schedule interview for a candidate",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInterviewRequest"
+              },
+              "examples": {
+                "video": {
+                  "value": {
+                    "interviewer": "Karl Recruiter",
+                    "type": "video",
+                    "scheduledAt": "2026-04-24T10:00:00.000Z",
+                    "durationMinutes": 60,
+                    "locationOrLink": "https://meet.example.com/ats-mari",
+                    "feedback": "Strong communication"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Interview created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Interview"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/interviews": {
+      "get": {
+        "tags": [
+          "Interviews"
+        ],
+        "summary": "List interviews with optional filters",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by candidate id"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Include interviews with scheduledAt >= from"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Include interviews with scheduledAt <= to"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of interviews",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InterviewWithCandidateName"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "CandidateId": {
+        "name": "candidateId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Candidate identifier"
+      }
+    },
+    "schemas": {
+      "CandidateStatus": {
+        "type": "string",
+        "enum": [
+          "new",
+          "screening",
+          "interview",
+          "offer",
+          "hired",
+          "rejected"
+        ]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "required": [
+          "ok",
+          "service"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": true
+          },
+          "service": {
+            "type": "string",
+            "example": "hire-flow-ats-backend"
+          }
+        }
+      },
+      "StatusHistoryItem": {
+        "type": "object",
+        "required": [
+          "status",
+          "note",
+          "changedAt"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/CandidateStatus"
+          },
+          "note": {
+            "type": "string"
+          },
+          "changedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Candidate": {
+        "type": "object",
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "position",
+          "status",
+          "statusHistory",
+          "interviews",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "cand_1713862000000_ab12cd3"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "position": {
+            "type": "string"
+          },
+          "cvUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "cvText": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/CandidateStatus"
+          },
+          "statusHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusHistoryItem"
+            }
+          },
+          "interviews": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of interview ids for this candidate"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateCandidateRequest": {
+        "type": "object",
+        "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "position"
+        ],
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 3
+          },
+          "position": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cvUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "cvText": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateCandidateRequest": {
+        "type": "object",
+        "minProperties": 1,
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 3
+          },
+          "position": {
+            "type": "string",
+            "minLength": 1
+          },
+          "cvUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "cvText": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      },
+      "StatusUpdateRequest": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/CandidateStatus"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      },
+      "InterviewType": {
+        "type": "string",
+        "enum": [
+          "phone",
+          "onsite",
+          "video"
+        ]
+      },
+      "CreateInterviewRequest": {
+        "type": "object",
+        "required": [
+          "interviewer",
+          "type",
+          "scheduledAt",
+          "durationMinutes"
+        ],
+        "properties": {
+          "interviewer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/InterviewType"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 480
+          },
+          "locationOrLink": {
+            "type": "string"
+          },
+          "feedback": {
+            "type": "string"
+          }
+        }
+      },
+      "Interview": {
+        "type": "object",
+        "required": [
+          "id",
+          "candidateId",
+          "interviewer",
+          "type",
+          "scheduledAt",
+          "durationMinutes",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "int_1713862000000_ef45gh6"
+          },
+          "candidateId": {
+            "type": "string"
+          },
+          "interviewer": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/InterviewType"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationMinutes": {
+            "type": "integer"
+          },
+          "locationOrLink": {
+            "type": "string",
+            "nullable": true
+          },
+          "feedback": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InterviewWithCandidateName": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Interview"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "candidateName": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "MessageResponse": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "object",
+            "description": "Zod flattened validation error payload"
+          }
+        }
+      }
+    }
+  }
+}
